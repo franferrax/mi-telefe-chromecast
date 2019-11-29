@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Mi Telefé Chromecast</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://content.jwplatform.com/libraries/IDzF9Zmk.js"></script>
+  <style type="text/css">
+    body {
+      background-color: #101010;
+    }
+
+    input {
+      width: 80%;
+      background-color: #202020;
+      color: pink;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="container text-white">
+    <h1>Mi Telefé Chromecast</h1>
+    <p>Pegá a continuación el <i>link</i> (<i>URL</i>) del cápitulo a mirar en el Chromecast, luego hacé <i>click</i> fuera del cuadro de texto y esperá unos segundos. Reemplazá el <i>link</i> para reproducir otro capítulo.</p>
+    <input type="text" name="fname" onchange="changed(this.value);" placeholder="https://telefe.com/pequena-victoria/capitulos/capitulo-01/">
+    <div class="my-5"></div>
+    <div id="player"></div>
+  </div>
+  <script type="text/javascript">
+    function changed(telefe_external_url) {
+      var request_1 = new XMLHttpRequest();
+      request_1.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          const telefe_page_lines = this.responseText.split('\n');
+          const json_part = telefe_page_lines.filter(line => line.toLowerCase().includes('api/videos/getsourceurl'));
+          const data_obj = JSON.parse(json_part[0]);
+          const relative_url = data_obj.children.top.model.videos[0].sources[0].url;
+          const telefe_internal_url = 'https://telefe.com' + relative_url;
+
+          var request_2 = new XMLHttpRequest();
+          request_2.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+              const curl_lines = JSON.parse(this.responseText).split('\n');
+              const redirect = curl_lines.filter(line => line.toLowerCase().startsWith('location'));
+              const m3u8_file = (redirect[0].split(': '))[1].trim();;
+              jwplayer('player').setup({
+                "playlist": [{
+                  "sources": [{
+                    "default": false,
+                    "file": m3u8_file,
+                    "label": "0",
+                    "type": "hls"
+                  }]
+                }],
+                "cast": {},
+                "primary": "html5",
+                "hlshtml": true,
+                "autostart": true
+              });
+            }
+          };
+          const curl_url = 'https://uploadbeta.com/api/curl/?cached&url=' + telefe_internal_url
+          request_2.open('GET', curl_url, true);
+          request_2.send();
+        }
+      }
+
+      const bypass_cors_url = 'https://cors-anywhere.herokuapp.com/' + telefe_external_url;
+      request_1.open('GET', bypass_cors_url, true);
+      request_1.send();
+    }
+
+  </script>
+</body>
+
+</html>
