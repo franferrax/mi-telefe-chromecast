@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function ()
+        {
+            "use strict";
+            var card_number = window.location.hash.substr(1);
+            fetch('https://www.edenred.com.ar/?rest_route=/edenred/balanceInquiry/MOT/card/' + card_number).then((response) =>
+            {
+                return response.json();
+            }).then((data) =>
+            {
+                var balance = document.getElementById('balance');
+                balance.textContent = parseFloat(data.AvailableBalance)
+                                      .toLocaleString('es-AR', {style: 'currency', currency: 'ARS'});
+            });
+        });
+    </script>
+    <title>Saldo Tarjeta Edenred</title>
+</head>
+
+<body class="container">
+<h1>Saldo Tarjeta Edenred</h1>
+<p>
+    Saldo: <span id="balance"><i>consultando...</i></span>
+</p>
+</body>
+</html>
