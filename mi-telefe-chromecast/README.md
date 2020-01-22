@@ -1,5 +1,5 @@
 # mi-telefe-chromecast
-### https://franferrax.github.io/mi-telefe-chromecast/
+### https://franferrax.github.io/tools/mi-telefe-chromecast/
 
 Una página sencilla para poder ver el contenido de Mi Telefé en el Chromecast (con *JW Player*)
 
