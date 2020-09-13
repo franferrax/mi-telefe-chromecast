@@ -48,6 +48,8 @@
         "hlshtml": true,
         "autostart": true
       });
+
+      window.location.hash = playlist_file;
     }
 
     function get_request(url, on_sucess) {
@@ -93,6 +95,10 @@
       });
     }
 
+  const url_fragment = window.location.hash.slice(1);
+  if (url_fragment) {
+    make_player(url_fragment);
+  }
   </script>
 </body>
 
