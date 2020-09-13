@@ -31,6 +31,25 @@
   </div>
   <!-- language=js -->
   <script type="text/javascript">
+    function make_player(playlist_file) {
+      'use strict';
+
+      jwplayer("player").setup({
+        "playlist": [{
+          "sources": [{
+            "default": false,
+            "file": playlist_file,
+            "label": "0",
+            "type": "hls"
+          }]
+        }],
+        "cast": {},
+        "primary": "html5",
+        "hlshtml": true,
+        "autostart": true
+      });
+    }
+
     function get_request(url, on_sucess) {
       'use strict';
 
@@ -46,6 +65,11 @@
 
     function changed(telefe_external_url) {
       'use strict';
+
+      if (telefe_external_url.toLowerCase().endsWith(".m3u8")) {
+        make_player(telefe_external_url);
+        return;
+      }
 
       const bypass_cors_url = "https://cors-anywhere.herokuapp.com/" + telefe_external_url;
       get_request(bypass_cors_url, (content) => {
@@ -64,20 +88,7 @@
             (line) => line.toLowerCase().startsWith("location")
           );
           const m3u8_file = (redirect[0].split(": "))[1].trim();
-          jwplayer("player").setup({
-            "playlist": [{
-              "sources": [{
-                "default": false,
-                "file": m3u8_file,
-                "label": "0",
-                "type": "hls"
-              }]
-            }],
-            "cast": {},
-            "primary": "html5",
-            "hlshtml": true,
-            "autostart": true
-          });
+          make_player(m3u8_file);
         });
       });
     }
