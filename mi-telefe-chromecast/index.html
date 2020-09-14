@@ -13,10 +13,14 @@
       background-color: #101010;
     }
 
-    input {
-      width: 80%;
-      background-color: #202020;
+    input.dark {
+      background-color: #101010;
       color: pink;
+    }
+
+    input.dark:focus {
+      background-color: #202020;
+      color: white;
     }
 
   </style>
@@ -29,7 +33,7 @@
       <a class="float-right" href="https://github.com/franferrax/tools/tree/gh-pages/mi-telefe-chromecast">GitHub</a>
     </h1>
     <p>Pegá a continuación el <i>link</i> (<i>URL</i>) del cápitulo a mirar en el Chromecast, luego hacé <i>click</i> fuera del cuadro de texto y esperá unos segundos. Reemplazá el <i>link</i> para reproducir otro capítulo. Para buscar un capítulo dirigite a <a target="_blank" href="https://telefe.com/capitulos-completos">telefe.com</a>.</p>
-    <input type="text" name="fname" onchange="changed(this.value);" placeholder="https://telefe.com/pequena-victoria/capitulos/capitulo-01/">
+    <input type="text" class="form-control dark" onchange="changed(this.value);" placeholder="https://telefe.com/pequena-victoria/capitulos/capitulo-01/">
     <div class="my-5"></div>
     <div id="player"></div>
   </div>
