@@ -82,7 +82,7 @@
     function changed(telefe_external_url) {
       'use strict';
 
-      if (telefe_external_url.toLowerCase().endsWith(".m3u8")) {
+      if ((new URL(telefe_external_url)).pathname.toLowerCase().endsWith(".m3u8")) {
         make_player(telefe_external_url);
         return;
       }
