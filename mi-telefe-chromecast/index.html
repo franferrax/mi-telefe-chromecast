@@ -45,14 +45,14 @@
 </div>
 <!-- language=js -->
 <script type="text/javascript">
-    function make_player(playlist_file) {
+    function from_playlist_url(playlist_url) {
       'use strict';
 
       jwplayer("player").setup({
         "playlist": [{
           "sources": [{
             "default": false,
-            "file": playlist_file,
+            "file": playlist_url,
             "label": "0",
             "type": "hls"
           }]
@@ -63,7 +63,7 @@
         "autostart": true
       });
 
-      window.location.hash = playlist_file;
+      window.location.hash = playlist_url;
     }
 
     function get_request(url, on_sucess) {
@@ -79,40 +79,60 @@
       request.send();
     }
 
-    function changed(telefe_external_url) {
+    function from_internal_url(internal_url) {
       'use strict';
 
-      if ((new URL(telefe_external_url)).pathname.toLowerCase().endsWith(".m3u8")) {
-        make_player(telefe_external_url);
-        return;
-      }
-
-      const bypass_cors_url = "https://cors-anywhere.herokuapp.com/" + telefe_external_url;
-      get_request(bypass_cors_url, (content) => {
-        const telefe_page_lines = content.split("\n");
-        const json_part = telefe_page_lines.filter(
-          (line) => line.toLowerCase().includes("api/videos/getsourceurl")
-        );
-        const data_obj = JSON.parse(json_part[0]);
-        const relative_url = data_obj.children.top.model.videos[0].sources[0].url;
-        const telefe_internal_url = "https://telefe.com" + relative_url;
-
-        const curl_url = "https://uploadbeta.com/api/curl/?cached&url=" + telefe_internal_url;
-        get_request(curl_url, (content) => {
-          const curl_lines = JSON.parse(content).split("\n");
-          const redirect = curl_lines.filter(
-            (line) => line.toLowerCase().startsWith("location")
-          );
-          const m3u8_file = (redirect[0].split(": "))[1].trim();
-          make_player(m3u8_file);
-        });
+      const curl_url = "https://uploadbeta.com/api/curl/?cached&url=" + internal_url;
+      get_request(curl_url, (content) => {
+        const curl_lines = JSON.parse(content).split("\n");
+        const redirect = curl_lines.filter((line) => line.toLowerCase().startsWith("location"));
+        const m3u8_file = (redirect[0].split(": "))[1].trim();
+        from_playlist_url(m3u8_file);
       });
     }
 
-  const url_fragment = window.location.hash.slice(1);
-  if (url_fragment) {
-    make_player(url_fragment);
-  }
+    function from_external_url(external_url) {
+      'use strict';
+
+      const bypass_cors_url = "https://cors-anywhere.herokuapp.com/" + external_url;
+      get_request(bypass_cors_url, (content) => {
+        const telefe_page_lines = content.split("\n");
+        const json_part = telefe_page_lines.filter(is_internal_url);
+        const data_obj = JSON.parse(json_part[0]);
+        const relative_url = data_obj.children.top.model.videos[0].sources[0].url;
+        const internal_url = "https://telefe.com" + relative_url;
+        from_internal_url(internal_url);
+      });
+    }
+
+    function is_playlist_url(url) {
+      'use strict';
+
+      return (new URL(url)).pathname.toLowerCase().endsWith(".m3u8")
+    }
+
+    function is_internal_url(url) {
+      'use strict';
+
+      return url.toLowerCase().includes("api/videos/getsourceurl");
+    }
+
+    function changed(url) {
+      'use strict';
+
+      if (is_playlist_url(url)) {
+        from_playlist_url(url);
+      } else if (is_internal_url(url)) {
+        from_internal_url(url);
+      } else {
+        from_external_url(url);
+      }
+    }
+
+    const url_from_fragment = window.location.hash.slice(1);
+    if (url_from_fragment) {
+      changed(url_from_fragment);
+    }
 
 </script>
 </body>
