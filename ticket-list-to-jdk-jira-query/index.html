@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Redirecting</title>
+</head>
+<body>
+Redirecting...
+<script>
+    const keys = decodeURIComponent(document.location.hash.slice(1)).split(" ")
+            .filter(id => id.length !== 0 && id !== "9999999").map(id => `JDK-${id}`)
+    if (keys.length > 0) {
+        let url = `https://bugs.openjdk.org/browse/${keys[0]}`
+        if (keys.length > 1) {
+            const jql = `issueKey in (${keys.join(", ")}) ORDER BY fixVersion, "Resolved In Build", updated`
+            url = `${url}?jql=${encodeURIComponent(jql)}`
+        }
+        window.location.replace(url)
+    } else {
+        document.title = "No issues"
+        document.querySelector("body").innerText = "No issue IDs in the URL hash string.";
+    }
+</script>
+</body>
+</html>
