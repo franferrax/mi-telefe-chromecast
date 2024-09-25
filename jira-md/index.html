@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>jira-md</title>
+    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+</head>
+<body>
+<article>
+    <header id="header" class="container"></header>
+    <main id="content" class="container">
+        <h1><code>jira-md</code>(<a href="https://github.com/franferrax/tools/tree/gh-pages/jira-md">GitHub</a>)</h1>
+        <p>Render Jira issue description as markdown.</p>
+        <h2>Usage</h2>
+        <p>Create a link as follows:</p>
+        <pre>https://franferrax.github.io/tools/jira-md#https://bugs.openjdk.org/browse/JDK-8336162</pre>
+    </main>
+</article>
+<script>
+    let issueURL = null
+    let originalIssueURL = null
+    let issueKey = null
+    try {
+        issueURL = new URL(decodeURIComponent(document.location.hash.substring(1)))
+        originalIssueURL = issueURL.href
+        const pathname = issueURL.pathname.split("/").filter(Boolean)
+        issueKey = pathname[pathname.findLastIndex(component => component.toLowerCase() === "browse") + 1]
+    } catch {}
+    if (issueKey) {
+        issueURL.pathname = `rest/api/2/issue/${issueKey}`
+        issueURL.search = "fields=description,summary"
+        const apiURL = "https://corsproxy.io/?" + encodeURIComponent(issueURL.href)
+        fetch(apiURL).then(r => r.json()).then(json => {
+            const content = document.getElementById("content")
+            content.innerHTML = window.markdownit().render(json.fields.description)
+            document.title = `${issueKey} (markdown)`
+            const header = document.getElementById("header")
+            const a = document.createElement("a")
+            a.href = originalIssueURL
+            a.innerText = issueKey
+            header.innerText = "Rendered from "
+            header.appendChild(a)
+            header.innerHTML += ": "
+            const em = document.createElement("em")
+            em.innerText = json.fields.summary
+            header.appendChild(em)
+        })
+    }
+</script>
+</body>
+</html>
