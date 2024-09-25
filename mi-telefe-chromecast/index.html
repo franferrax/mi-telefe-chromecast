@@ -34,12 +34,13 @@
         Mi Telefé Chromecast
         <a class="float-right" href="https://github.com/franferrax/tools/tree/gh-pages/mi-telefe-chromecast">GitHub</a>
     </h1>
-    <p>Pegá a continuación el <i>link</i> (<i>URL</i>) del cápitulo a mirar en el Chromecast, luego hacé <i>click</i>
+    <p>Pegá a continuación el <i>link</i> (<i>URL</i>) del cápitulo a mirar en el Chromecast, luego hacé <i>clic</i>
         fuera del cuadro de texto y esperá unos segundos. Reemplazá el <i>link</i> para reproducir otro capítulo. Para
-        buscar un capítulo dirigite a <a href="https://telefe.com/capitulos-completos" target="_blank">telefe.com</a>.
+        buscar un capítulo dirigite a <a href="https://mitelefe.com/capitulos-completos" target="_blank">
+            mitelefe.com</a>.
     </p>
     <input type="text" class="form-control dark" onchange="changed(this.value);"
-           placeholder="https://telefe.com/pequena-victoria/capitulos/capitulo-01/">
+           placeholder="https://mitelefe.com/pequena-victoria/capitulos/capitulo-01/">
     <div class="my-5"></div>
     <div id="player"></div>
 </div>
@@ -66,41 +67,67 @@
       window.location.hash = playlist_url;
     }
 
-    function get_request(url, on_sucess) {
+    function get_request(url, on_success) {
       'use strict';
 
       var request = new XMLHttpRequest();
       request.onreadystatechange = function() {
         if (this.readyState === 4 && this.status === 200) {
-          on_sucess(this.responseText);
+          on_success(this.responseText);
         }
       };
       request.open("GET", url, true);
       request.send();
     }
 
+    function bypass_cors(url) {
+      'use strict';
+
+      return "https://corsproxy.io/?" + encodeURIComponent(url);
+    }
+
+    function curl_url(url) {
+      'use strict';
+
+      return "https://uploadbeta.com/api/curl/?cached&url=" + encodeURIComponent(url);
+    }
+
+    function follow_redirects(url, attempts, on_finished) {
+      'use strict';
+
+      if (attempts <= 0) {
+        on_finished(url);
+      } else {
+        get_request(curl_url(url), (content) => {
+          const redirect_lines = JSON.parse(content).split("\n")
+            .filter((line) => line.toLowerCase().startsWith("location"));
+          if (redirect_lines.length > 0) {
+            const redirect_url = (redirect_lines[0].split(": "))[1].trim();
+            setTimeout(follow_redirects, 1000, redirect_url, attempts - 1, on_finished);
+          } else {
+            on_finished(url);
+          }
+        });
+      }
+    }
+
     function from_internal_url(internal_url) {
       'use strict';
 
-      const curl_url = "https://uploadbeta.com/api/curl/?cached&url=" + internal_url;
-      get_request(curl_url, (content) => {
-        const curl_lines = JSON.parse(content).split("\n");
-        const redirect = curl_lines.filter((line) => line.toLowerCase().startsWith("location"));
-        const m3u8_file = (redirect[0].split(": "))[1].trim();
-        from_playlist_url(m3u8_file);
+      follow_redirects(internal_url, 3, (final_url) => {
+        from_playlist_url(final_url);
       });
     }
 
     function from_external_url(external_url) {
       'use strict';
 
-      const bypass_cors_url = "https://corsproxy.io/?" + encodeURIComponent(external_url);
-      get_request(bypass_cors_url, (content) => {
+      get_request(bypass_cors(external_url), (content) => {
         const telefe_page_lines = content.split("\n");
         const json_part = telefe_page_lines.filter(is_internal_url);
         const data_obj = JSON.parse(json_part[0]);
         const relative_url = data_obj.children.top.model.videos[0].sources[0].url;
-        const internal_url = "https://telefe.com" + relative_url;
+        const internal_url = "https://mitelefe.com" + relative_url;
         from_internal_url(internal_url);
       });
     }
