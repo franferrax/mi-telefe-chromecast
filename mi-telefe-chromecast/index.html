@@ -38,9 +38,6 @@
         fuera del cuadro de texto y esperá unos segundos. Reemplazá el <i>link</i> para reproducir otro capítulo. Para
         buscar un capítulo dirigite a <a href="https://telefe.com/capitulos-completos" target="_blank">telefe.com</a>.
     </p>
-    <p>Si no funciona, visitá <a href="https://cors-anywhere.herokuapp.com/" target="_blank">este sitio</a>, apretá el
-        botón y recargá esta página.
-    </p>
     <input type="text" class="form-control dark" onchange="changed(this.value);"
            placeholder="https://telefe.com/pequena-victoria/capitulos/capitulo-01/">
     <div class="my-5"></div>
@@ -97,7 +94,7 @@
     function from_external_url(external_url) {
       'use strict';
 
-      const bypass_cors_url = "https://cors-anywhere.herokuapp.com/" + external_url;
+      const bypass_cors_url = "https://corsproxy.io/?" + encodeURIComponent(external_url);
       get_request(bypass_cors_url, (content) => {
         const telefe_page_lines = content.split("\n");
         const json_part = telefe_page_lines.filter(is_internal_url);
