@@ -1,15 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="auto">
 <head>
     <title>jira-md</title>
-    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" rel="stylesheet"/>
-    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"
+            integrity="sha512-LMzdh9f2IrP9SNTjJ5n7W3DNIyKn9WmMUP1zSXNR9hy388KJ2WetvVgTkxx/QHmbuVN8uiBkaiZtYjjl99oeRw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/js/all.min.js"
+            integrity="sha512-6sSYJqDreZRZGkJ3b+YfdhB3MzmuP9R7X1QZ6g5aIXhRvR1Y/N/P47jmnkENm7YL3oqsmI6AK+V6AD99uWDnIw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/fontawesome.min.css" rel="stylesheet"
+          integrity="sha512-B46MVOJpI6RBsdcU307elYeStF2JKT87SsHZfRSkjVi4/iZ3912zXi45X5/CBr/GbCyLx6M1GQtTKYRd52Jxgw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css" rel="stylesheet"
+          integrity="sha512-UXfikgakSZBii5lkvmDCRO+IYWQhTtwMOJ+3EmGEA+oA82kvbSskgw3OI16Jx1kINgF8aqOkYE+c9h4m6muONg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
 </head>
 <body>
 <article>
-    <header id="header" class="container"></header>
+    <header class="container">
+        <nav>
+            <ul><li id="header">Here goes a reference to the original Jira issue</li></ul>
+            <ul>
+                <li><a href="" id="theme"></a></li>
+                <li><a href="https://github.com/franferrax/tools/tree/gh-pages/jira-md">
+                    <i class="fa-brands fa-github"></i>
+                </a></li>
+            </ul>
+        </nav>
+    </header>
     <main id="content" class="container">
-        <h1><code>jira-md</code>(<a href="https://github.com/franferrax/tools/tree/gh-pages/jira-md">GitHub</a>)</h1>
+        <h1><code>jira-md</code></h1>
         <p>Render Jira issue description as markdown.</p>
         <h2>Usage</h2>
         <p>Create a link as follows:</p>
@@ -17,6 +37,28 @@
     </main>
 </article>
 <script>
+    // Light/dark theme switching
+    const moonIcon = document.createElement("i")
+    moonIcon.setAttribute("class", "fa-regular fa-moon")
+    const sunIcon = document.createElement("i")
+    sunIcon.setAttribute("class", "fa-regular fa-sun")
+    const theme = document.getElementById("theme")
+    theme.appendChild(moonIcon)
+    theme.addEventListener("click", (event) => {
+        event.preventDefault()
+        while (theme.firstChild) {
+            theme.removeChild(theme.firstChild);
+        }
+        if (document.documentElement.getAttribute("data-theme") === "dark") {
+            document.documentElement.setAttribute("data-theme", "light")
+            theme.appendChild(moonIcon)
+        } else {
+            document.documentElement.setAttribute("data-theme", "dark")
+            theme.appendChild(sunIcon)
+        }
+    })
+
+    // Jira issue markdown rendering
     let issueURL = null
     let originalIssueURL = null
     let issueKey = null
