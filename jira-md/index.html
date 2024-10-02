@@ -27,8 +27,10 @@
         issueKey = pathname[pathname.findLastIndex(component => component.toLowerCase() === "browse") + 1]
     } catch {}
     if (issueKey) {
+        // cacheID ensures a new version is retrieved every 30 seconds
+        const cacheID = Math.round(Date.now() / 30000)
         issueURL.pathname = `rest/api/2/issue/${issueKey}`
-        issueURL.search = "fields=description,summary"
+        issueURL.search = `fields=description,summary&cacheID=${cacheID}`
         const apiURL = "https://corsproxy.io/?" + encodeURIComponent(issueURL.href)
         fetch(apiURL).then(r => r.json()).then(json => {
             const content = document.getElementById("content")
